@@ -1,33 +1,46 @@
 """
-Command line runner for the Music Recommender Simulation.
-
-This file helps you quickly run and test your recommender.
-
-You will implement the functions in recommender.py:
-- load_songs
-- score_song
-- recommend_songs
+CLI: I load CSV -> loop profiles -> recommend_songs -> print top k with reasons.
 """
 
-from recommender import load_songs, recommend_songs
+from pathlib import Path
+
+from src.recommender import load_songs, recommend_songs
+
+# project root so data path works when I run: python -m src.main
+_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _print_block(title: str, user_prefs: dict, songs: list, k: int = 5) -> None:
+    """I show one profile's rankings: prefs -> scores -> terminal lines."""
+    print(f"\n--- {title} ---")
+    recs = recommend_songs(user_prefs, songs, k=k)
+    for song, score, explanation in recs:
+        print(f"{song['title']} — {score:.2f}")
+        print(f"  Because: {explanation}")
+        print()
 
 
 def main() -> None:
-    songs = load_songs("data/songs.csv") 
+    # CSV on disk -> list[dict] I can score
+    songs = load_songs(str(_ROOT / "data" / "songs.csv"))
+    print(f"\nCatalog: {len(songs)} songs\n")
 
-    # Starter example profile
-    user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
-
-    recommendations = recommend_songs(user_prefs, songs, k=5)
-
-    print("\nTop recommendations:\n")
-    for rec in recommendations:
-        # You decide the structure of each returned item.
-        # A common pattern is: (song, score, explanation)
-        song, score, explanation = rec
-        print(f"{song['title']} - Score: {score:.2f}")
-        print(f"Because: {explanation}")
-        print()
+    # three tastes -> three ranked lists (stress-test my weights)
+    _print_block(
+        "Happy high-energy pop",
+        {"genre": "pop", "mood": "happy", "energy": 0.85, "likes_acoustic": False},
+        songs,
+    )
+    _print_block(
+        "Chill lofi",
+        {"genre": "lofi", "mood": "chill", "energy": 0.35, "likes_acoustic": True},
+        songs,
+    )
+    _print_block(
+        "Intense rock",
+        {"genre": "rock", "mood": "intense", "energy": 0.9, "likes_acoustic": False},
+        songs,
+    )
 
 
 if __name__ == "__main__":
