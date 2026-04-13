@@ -9,3 +9,8 @@ id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
 9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
 10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
+11,Bass Bunker,DJ Prism,edm,happy,0.95,128,0.88,0.91,0.04
+12,Sad Sunday,Sable Row,indie,sad,0.32,74,0.22,0.45,0.72
+13,Metal Forge,Nine Anvil,metal,intense,0.96,168,0.35,0.55,0.08
+14,Reggae Corner,Island Line,reggae,relaxed,0.55,92,0.78,0.70,0.45
+15,Classical Dawn,String Theory,classical,relaxed,0.22,72,0.55,0.30,0.95
