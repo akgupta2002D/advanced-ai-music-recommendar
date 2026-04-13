@@ -1,111 +1,46 @@
-# 🎧 Model Card: Music Recommender Simulation
+# Model Card: Music Recommender Simulation
 
-## 1. Model Name  
+## 1. Model Name
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+**VibeRank CSV 1.0**
 
----
+## 2. Intended Use
 
-## 2. Intended Use  
+- **Task:** Suggest top tracks from a small local catalog using **genre, mood, energy**, plus a light **acoustic** nudge.
+- **Who:** Me exploring how **prefs → score → sort** works.
+- **Not for:** Real users, A/B tests, or safety-sensitive decisions.
 
-Describe what your recommender is designed to do and who it is for. 
+## 3. How the Model Works
 
-Prompts:  
+I give points when the user’s **genre** appears in the song’s genre label and when **mood** matches exactly. For **energy**, I reward songs **closer** to the user’s target (not “higher energy always wins”). If `likes_acoustic` is set, I tilt toward higher or lower **acousticness**. I sum points, sort descending, return the top few, and **string together the reasons** I added along the way.
 
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+## 4. Data
 
----
+- **~15** synthetic songs in `data/songs.csv` (I added a few genres: edm, metal, reggae, classical, etc.).
+- **Limits:** fake titles, uneven genre coverage, no release year or popularity.
 
-## 3. How the Model Works  
+## 5. Strengths
 
-Explain your scoring approach in simple language.  
+- **Explainable:** every score has human-readable “because” fragments.
+- **Fast / simple:** no training loop; easy to audit in Python.
+- **Profiles:** happy pop vs chill lofi vs intense rock **separate** in sensible ways on my runs.
 
-Prompts:  
+## 6. Limitations and Bias
 
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
+I only see **hand-picked tags**, so **synonyms** (rock vs metal) and **subcultures** collapse badly. Energy-only users can still get **mood mismatches** if genre lines up. A bigger risk is **self-reinforcement**: if the CSV skews pop, my **+2 genre** rule can **crowd out** mood-only fits—classic **filter bubble** risk if this were a real feed.
 
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+## 7. Evaluation
 
----
+- **`pytest`** on the `Recommender` fixture (pop/happy/high energy should beat chill lofi).
+- **Manual:** `python -m src.main` with three dict profiles; I read top 5 lists for sanity.
+- **Surprise:** `Bass Bunker` can sneak high on “happy pop” via mood+energy even without genre—shows how **weight balance** changes who “wins.”
 
-## 4. Data  
+## 8. Future Work
 
-Describe the dataset the model uses.  
+- Add **diversity** in top-*k* (avoid near-duplicate vibes).
+- **Genre families** (map metal→rock for certain users).
+- Use **valence / danceability** with clear user knobs.
 
-Prompts:  
+## 9. Personal Reflection
 
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
-
----
-
-## 5. Strengths  
-
-Where does your system seem to work well  
-
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
-
----
-
-## 6. Limitations and Bias 
-
-Where the system struggles or behaves unfairly. 
-
-Prompts:  
-
-- Features it does not consider  
-- Genres or moods that are underrepresented  
-- Cases where the system overfits to one preference  
-- Ways the scoring might unintentionally favor some users  
-
----
-
-## 7. Evaluation  
-
-How you checked whether the recommender behaved as expected. 
-
-Prompts:  
-
-- Which user profiles you tested  
-- What you looked for in the recommendations  
-- What surprised you  
-- Any simple tests or comparisons you ran  
-
-No need for numeric metrics unless you created some.
-
----
-
-## 8. Future Work  
-
-Ideas for how you would improve the model next.  
-
-Prompts:  
-
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
-
----
-
-## 9. Personal Reflection  
-
-A few sentences about your experience.  
-
-Prompts:  
-
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+The biggest learning was separating **“score one row”** from **“rank the table”**—same math, two roles. I used AI for speed, but I **re-checked** weights against tests and my gut. Simple sums already feel “smart”; that makes me **more cautious** about opaque production recommenders.
