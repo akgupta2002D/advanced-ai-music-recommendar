@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-04-27T02:12:30.014242+00:00",
+  "passed": 3,
+  "total": 3,
+  "pass_rate": 1.0,
+  "results": [
+    {
+      "name": "happy_pop",
+      "ok": true,
+      "confidence": 0.65,
+      "candidate_count": 4,
+      "top_song": "Sunrise City",
+      "top_genre": "pop",
+      "story_present": true,
+      "error": ""
+    },
+    {
+      "name": "study_focus",
+      "ok": true,
+      "confidence": 0.87,
+      "candidate_count": 3,
+      "top_song": "Focus Flow",
+      "top_genre": "lofi",
+      "story_present": true,
+      "error": ""
+    },
+    {
+      "name": "intense_rock",
+      "ok": true,
+      "confidence": 1.0,
+      "candidate_count": 3,
+      "top_song": "Storm Runner",
+      "top_genre": "rock",
+      "story_present": true,
+      "error": ""
+    }
+  ]
+}
