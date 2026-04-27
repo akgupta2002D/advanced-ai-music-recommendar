@@ -1,73 +1,128 @@
-# Music Recommender Simulation
+# AI DJ Copilot
 
-## Project Summary
+AI DJ Copilot is an applied AI music recommendation system that combines a transparent ranker, retrieval-enhanced candidate selection, and a narrative playlist story generator. It is packaged as a modern Streamlit wizard UI so users can go from intent to refined playlist in a few steps.
 
-I built a **content-based** recommender: each song row gets a **weighted score** from my prefs (genre, mood, energy, acoustic taste), then I **sort** and show the top *k*. 
+## Base Project (Module 1-3 Lineage)
 
----
+This project extends my earlier **Music Recommender Simulation** from Modules 1-3. The original version focused on deterministic, content-based scoring from CSV metadata (genre, mood, energy, acousticness) and returned top-k songs with simple reasons.  
+In this final version, I redesigned it into a complete applied AI system with a Copilot flow, retrieval stage, confidence/guardrails, reliability evaluation, and portfolio-ready UI.
 
-## How The System Works
+## Why This Matters
 
-**Real apps (e.g. Spotify)** blend **collaborative** signals (“people like you listened…”) with **content** features (tempo, mood). **My version** is **content-only**: I only read the CSV attributes I coded for.
+- Converts a static recommender into an interactive AI product flow.
+- Keeps recommendations explainable with score-component breakdowns.
+- Adds reliability signals so users can trust when to accept or refine output.
 
-**Features I use**
+## System Architecture
 
-- **Song (CSV / `Song`):** genre, mood, energy, tempo_bpm, valence, danceability, acousticness (tempo/valence/danceability load but are not scored yet).
-- **User prefs:** `genre`, `mood`, `energy`, optional `likes_acoustic` (CLI dict). **`UserProfile`** maps to the same dict for tests.
-
-**Scoring (high level)**
-
-- Genre substring match → **+2.0** (so `pop` can match `indie pop`).
-- Mood exact (case-insensitive) → **+1.0**.
-- Energy → **3.0 × (1 − |song_energy − target|)** so **closer** beats “always louder.”
-- Acoustic → small nudge toward high `acousticness` if `likes_acoustic`, else toward lower.
-
-**Flow**
+Architecture source: [`assets/system_architecture.md`](assets/system_architecture.md)
 
 ```mermaid
 flowchart LR
-  A[User prefs] --> B[For each song]
-  B --> C[score_song]
-  C --> D[Sort by score]
-  D --> E[Top k + reasons]
+  userInput[UserWizardInput] --> parser[IntentParserToPreferences]
+  parser --> retrieval[RetrieverGenreMoodSynonymLookup]
+  retrieval --> ranking[HybridRankerRuleWeightsPlusRetrievalScore]
+  ranking --> storyGen[PlaylistStoryGenerator]
+  storyGen --> evaluator[ReliabilityEvaluatorAndGuardrails]
+  evaluator --> output[RecommendationsReasonsStoryConfidence]
+  output --> ui[StreamlitResultsAndRefinementStep]
+  ui --> parser
+  evaluator --> humanCheck[HumanReviewOrTestHarness]
 ```
 
----
+## Core Features
 
-## Getting Started
+- **Modern UI and flow:** Streamlit 4-step wizard with presets, validation, and refinement.
+- **Copilot intent parsing:** Converts natural language intent into structured preferences.
+- **RAG-lite retrieval:** Candidate songs are prioritized with genre and mood semantic expansions.
+- **Transparent scoring:** Genre, mood, energy, acoustic, and retrieval contributions are exposed.
+- **Playlist story:** Generates a concise narrative of the energy arc and transition logic.
+- **Guardrails:** Low-confidence flag + safer defaults path.
+- **Reliability tooling:** Automated evaluation script writes reproducible JSON reports.
+
+## Setup Instructions
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Run Streamlit UI
+
+```bash
+streamlit run app.py
+```
+
+### Run CLI Demo
+
+```bash
 python -m src.main
+```
+
+### Run Tests
+
+```bash
 pytest
 ```
 
----
+### Run Reliability Evaluation
 
-## Experiments
+```bash
+python -m src.evaluation
+```
 
-- I ran **three profiles** in `src/main.py` (happy pop, chill lofi, intense rock) and checked the printed top 5.
+Output artifact: `artifacts/reliability_report.json`  
+Request logs: `artifacts/recommendation_log.jsonl`
 
-### CLI output
+## Sample Interactions
 
-Run: `python -m src.main`
+### 1) Gym Boost
+- **Input intent:** "gym opener then cool down, high energy"
+- **Expected behavior:** intense/edm/rock-leaning top songs, high confidence, story mentions momentum arc.
+- **Typical output pattern:** top tracks include high-energy songs with low acousticness.
 
-![CLI: 15 songs loaded, then top 5 picks for three profiles](./cli_ss.png)
+### 2) Study Flow
+- **Input intent:** "focus coding session, minimal distraction"
+- **Expected behavior:** lofi/ambient-focused picks, moderate energy, acoustic-friendly tracks.
+- **Typical output pattern:** mood alignment toward focused/chill with stable energy.
 
----
+### 3) Night Drive
+- **Input intent:** "moody neon highway vibe"
+- **Expected behavior:** synthwave/moody results with narrative transition explanation.
+- **Typical output pattern:** medium-high energy with smoother progression story.
 
-## Limitations and Risks
+## Design Decisions and Trade-Offs
 
-- **Tiny catalog** → repeated winners, easy **filter bubble** if weights favor one genre.
-- **No lyrics, language, or listening history** → misses why humans like a track.
-- **“Metal” ≠ “rock”** in my tags → a “rock” user might miss close neighbors unless I add fuzzy genre groups.
+- I used deterministic scoring to preserve explainability and fast iteration.
+- RAG-lite retrieval is lightweight and local (no external APIs), trading broad semantic power for reproducibility.
+- Story generation is grounded in score components to reduce hallucinated justifications.
+- Confidence is heuristic, not probabilistic; this is interpretable but approximate.
 
-Deeper bias notes: [`model_card.md`](model_card.md).
+## Testing Summary
 
----
+- Unit tests cover baseline ranking behavior plus Copilot intent parsing, validation, consistency, and story generation.
+- Reliability script runs scenario-based checks and writes pass/fail metrics.
+- Known weak point: tiny synthetic catalog can limit diversity and lower confidence in narrow requests.
 
 ## Reflection
 
-I learned that **transparent rules** still “feel” like recommendations because ranking is easy to narrate—but they also **encode my weight choices** as bias. See in [`model_card.md`](model_card.md) and [`reflection.md`](reflection.md).
+- Main learning: user flow and reliability signals are as important as ranking math.
+- Most helpful AI collaboration: speeding up modularization and test scaffolding ideas.
+- Flawed AI suggestion example: over-aggressive retrieval boosts caused irrelevant songs to float upward; fixed by lowering retrieval bonus and keeping ranker dominant.
+
+## Ethics, Risks, and Responsible Use
+
+- Bias risk from small and hand-curated metadata labels.
+- Misuse risk: presenting recommendations as objectively correct; mitigated with explanations and confidence messaging.
+- Guardrail behavior: low-confidence outputs explicitly suggest refinement or safe defaults.
+
+## Presentation and Portfolio Artifacts
+
+- GitHub repository: this project.
+- Loom walkthrough link: **ADD YOUR LOOM URL HERE**
+- Suggested video checklist:
+  - end-to-end run with 2-3 inputs,
+  - visible AI feature behavior (retrieval + story),
+  - confidence/guardrail behavior,
+  - clear final recommendations.

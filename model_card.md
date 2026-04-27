@@ -1,46 +1,69 @@
-# Model Card: Music Recommender Simulation
+# Model Card: AI DJ Copilot
 
-## 1. Model Name
+## 1) Model Name
 
-**VibeRank CSV 1.0**
+**AI DJ Copilot v2 (RAG-lite Hybrid Ranker)**
 
-## 2. Intended Use
+## 2) Intended Use
 
-- **Task:** Suggest top tracks from a small local catalog using **genre, mood, energy**, plus a light **acoustic** nudge.
-- **Who:** Me exploring how **prefs → score → sort** works.
-- **Not for:** Real users, A/B tests, or safety-sensitive decisions.
+- **Primary task:** Generate personalized music recommendations and a narrative playlist story.
+- **Audience:** Coursework demo and educational prototyping.
+- **Not intended for:** production personalization at scale, safety-critical decisions, or commercial ranking experiments.
 
-## 3. How the Model Works
+## 3) System Description
 
-I give points when the user’s **genre** appears in the song’s genre label and when **mood** matches exactly. For **energy**, I reward songs **closer** to the user’s target (not “higher energy always wins”). If `likes_acoustic` is set, I tilt toward higher or lower **acousticness**. I sum points, sort descending, return the top few, and **string together the reasons** I added along the way.
+The system combines:
+- **Intent parsing** to map free-form user requests to structured preferences.
+- **Retriever** that boosts candidate songs using genre/mood semantic aliases.
+- **Transparent ranker** that scores genre, mood, energy closeness, acousticness, and retrieval bonus.
+- **Story generator** that explains overall playlist flow and transition logic.
+- **Guardrails** that flag low-confidence outputs and offer safe default recovery.
 
-## 4. Data
+## 4) Data
 
-- **~15** synthetic songs in `data/songs.csv` (I added a few genres: edm, metal, reggae, classical, etc.).
-- **Limits:** fake titles, uneven genre coverage, no release year or popularity.
+- Source: local synthetic catalog in `data/songs.csv` (~15 tracks).
+- Features: genre, mood, energy, tempo, valence, danceability, acousticness.
+- Limitations:
+  - small and hand-curated dataset,
+  - uneven genre representation,
+  - no listener history or collaborative signal.
 
-## 5. Strengths
+## 5) Strengths
 
-- **Explainable:** every score has human-readable “because” fragments.
-- **Fast / simple:** no training loop; easy to audit in Python.
-- **Profiles:** happy pop vs chill lofi vs intense rock **separate** in sensible ways on my runs.
+- Recommendations are explainable through score contributions and reason strings.
+- Reproducible, local, and fast to run (no external model dependency required).
+- User flow supports refinement, not one-shot output.
 
-## 6. Limitations and Bias
+## 6) Limitations and Biases
 
-I only see **hand-picked tags**, so **synonyms** (rock vs metal) and **subcultures** collapse badly. Energy-only users can still get **mood mismatches** if genre lines up. A bigger risk is **self-reinforcement**: if the CSV skews pop, my **+2 genre** rule can **crowd out** mood-only fits—classic **filter bubble** risk if this were a real feed.
+- Label bias: recommendations only reflect metadata quality and catalog coverage.
+- Potential filter bubble: repeated genre preference can dominate ranking outcomes.
+- Semantic gaps: alias-based retrieval is limited versus true embedding retrieval.
+- Confidence score is heuristic and should be interpreted as directional only.
 
-## 7. Evaluation
+## 7) Reliability and Evaluation
 
-- **`pytest`** on the `Recommender` fixture (pop/happy/high energy should beat chill lofi).
-- **Manual:** `python -m src.main` with three dict profiles; I read top 5 lists for sanity.
-- **Surprise:** `Bass Bunker` can sneak high on “happy pop” via mood+energy even without genre—shows how **weight balance** changes who “wins.”
+- Unit tests cover ranking, parsing, validation, consistency, and story presence.
+- Scenario-based reliability runner (`python -m src.evaluation`) reports pass rate and top result quality.
+- Structured recommendation logs (`artifacts/recommendation_log.jsonl`) track confidence, guardrails, and top outputs.
 
-## 8. Future Work
+## 8) Misuse Risks and Mitigations
 
-- Add **diversity** in top-*k* (avoid near-duplicate vibes).
-- **Genre families** (map metal→rock for certain users).
-- Use **valence / danceability** with clear user knobs.
+- **Risk:** Users may treat recommendations as objective truth.  
+  **Mitigation:** display reasons, confidence, and refinement controls.
+- **Risk:** Overconfidence on sparse matches.  
+  **Mitigation:** low-confidence flag + safer defaults path.
+- **Risk:** Biased output due to catalog imbalance.  
+  **Mitigation:** document limitations and encourage wider data coverage.
 
-## 9. Personal Reflection
+## 9) Reflection and Ethics
 
-The biggest learning was separating **“score one row”** from **“rank the table”**—same math, two roles. I used AI for speed, but I **re-checked** weights against tests and my gut. Simple sums already feel “smart”; that makes me **more cautious** about opaque production recommenders.
+- **What surprised me in reliability testing:** Small weight changes can noticeably reorder top picks, especially in sparse genres.
+- **Helpful AI collaboration example:** AI helped scaffold modular flow (parser -> retriever -> ranker -> story) faster than manual refactoring alone.
+- **Flawed AI collaboration example:** An early AI suggestion overweighted retrieval boosts and reduced recommendation quality; I corrected this by capping retrieval impact so core scoring remains primary.
+
+## 10) Future Improvements
+
+- Add diversity constraints in top-k to reduce near-duplicate vibe picks.
+- Upgrade retrieval from alias rules to embedding-based semantic similarity.
+- Add human-in-the-loop thumbs up/down feedback to tune ranking weights.
