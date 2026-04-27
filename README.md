@@ -18,7 +18,7 @@ In this final version, I redesigned it into a complete applied AI system with a 
 Architecture source: [`assets/system_architecture.md`](assets/system_architecture.md)
 
 ```mermaid
-flowchart LR
+flowchart TD
   userInput[UserWizardInput] --> parser[IntentParserToPreferences]
   parser --> retrieval[RetrieverGenreMoodSynonymLookup]
   retrieval --> ranking[HybridRankerRuleWeightsPlusRetrievalScore]
@@ -88,6 +88,20 @@ Output artifact: `artifacts/reliability_report.json`
 Request logs: `artifacts/recommendation_log.jsonl`
 
 ## Sample Interactions
+
+### Walkthrough Example (App UI)
+
+**Step 1: Select vibe and tune preferences**
+![Wizard step and controls](assets/Screenshot%202026-04-27%20at%209.37.28%E2%80%AFAM.png)
+
+**Step 2: Generate ranked recommendations**
+![Generated recommendations](assets/Screenshot%202026-04-27%20at%209.37.36%E2%80%AFAM.png)
+
+**Step 3: Review playlist story and confidence**
+![Playlist story and confidence](assets/Screenshot%202026-04-27%20at%209.37.55%E2%80%AFAM.png)
+
+**Step 4: Refine and regenerate**
+![Refine flow](assets/Screenshot%202026-04-27%20at%209.38.02%E2%80%AFAM.png)
 
 ### 1) Gym Boost
 - **Input intent:** "gym opener then cool down, high energy"
