@@ -91,6 +91,9 @@ Request logs: `artifacts/recommendation_log.jsonl`
 
 ### Walkthrough Example (App UI)
 
+**Demo video walkthrough (GIF)**
+![AI DJ Copilot walkthrough GIF](assets/finalvideo.gif)
+
 **Step 1: Select vibe and tune preferences**
 ![Wizard step and controls](assets/Screenshot%202026-04-27%20at%209.37.28%E2%80%AFAM.png)
 
@@ -99,9 +102,6 @@ Request logs: `artifacts/recommendation_log.jsonl`
 
 **Step 3: Review playlist story and confidence**
 ![Playlist story and confidence](assets/Screenshot%202026-04-27%20at%209.37.55%E2%80%AFAM.png)
-
-**Step 4: Refine and regenerate**
-![Refine flow](assets/Screenshot%202026-04-27%20at%209.38.02%E2%80%AFAM.png)
 
 ### 1) Gym Boost
 - **Input intent:** "gym opener then cool down, high energy"
