@@ -108,6 +108,57 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     return score, reasons
 
 
+def score_song_detailed(user_prefs: Dict, song: Dict) -> Dict:
+    """
+    Same scoring logic as score_song, but I also return per-feature contributions.
+    This powers richer UI explanations and confidence calculations.
+    """
+    score = 0.0
+    reasons: List[str] = []
+    contributions = {
+        "genre": 0.0,
+        "mood": 0.0,
+        "energy": 0.0,
+        "acoustic": 0.0,
+        "retrieval": 0.0,
+    }
+
+    g = user_prefs.get("genre", "")
+    if g and _genre_matches(str(g), str(song["genre"])):
+        score += _GENRE_MATCH
+        contributions["genre"] = _GENRE_MATCH
+        reasons.append(f"genre match (+{_GENRE_MATCH})")
+
+    m = user_prefs.get("mood", "")
+    if m and str(m).lower().strip() == str(song["mood"]).lower().strip():
+        score += _MOOD_MATCH
+        contributions["mood"] = _MOOD_MATCH
+        reasons.append(f"mood match (+{_MOOD_MATCH})")
+
+    if "energy" in user_prefs:
+        epts, ers = _energy_points(float(song["energy"]), float(user_prefs["energy"]))
+        score += epts
+        contributions["energy"] = epts
+        reasons.append(ers)
+
+    apts, areasons = _acoustic_points(song, user_prefs.get("likes_acoustic"))
+    score += apts
+    contributions["acoustic"] = apts
+    reasons.extend(areasons)
+
+    retrieval_boost = float(user_prefs.get("_retrieval_boost", 0.0))
+    if retrieval_boost:
+        score += retrieval_boost
+        contributions["retrieval"] = retrieval_boost
+        reasons.append(f"retrieval fit (+{retrieval_boost:.2f})")
+
+    return {
+        "score": score,
+        "reasons": reasons,
+        "contributions": contributions,
+    }
+
+
 class Recommender:
     """I wrap Song objects and delegate scoring through score_song."""
 
