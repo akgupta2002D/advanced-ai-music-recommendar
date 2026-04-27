@@ -1,7 +1,7 @@
 # AI DJ Copilot System Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
   userInput[UserWizardInput] --> parser[IntentParserToPreferences]
   parser --> retrieval[RetrieverGenreMoodSynonymLookup]
   retrieval --> ranking[HybridRankerRuleWeightsPlusRetrievalScore]

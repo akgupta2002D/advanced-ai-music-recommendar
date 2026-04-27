@@ -48,6 +48,18 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Quick Demo (2 minutes)
+
+```bash
+streamlit run app.py
+```
+
+Then in the app:
+- choose a preset (`Gym Boost`, `Study Flow`, or `Night Drive`),
+- generate recommendations,
+- read the playlist story and confidence value,
+- tweak energy in Refine and regenerate once.
+
 ### Run Streamlit UI
 
 ```bash
@@ -105,6 +117,25 @@ Request logs: `artifacts/recommendation_log.jsonl`
 - Reliability script runs scenario-based checks and writes pass/fail metrics.
 - Known weak point: tiny synthetic catalog can limit diversity and lower confidence in narrow requests.
 
+### Current Reliability Output
+
+- Latest local run: `3/3` scenarios passed (`pass_rate = 1.00`) from `artifacts/reliability_report.json`.
+
+## Project Structure
+
+```text
+.
+├── app.py
+├── data/songs.csv
+├── src/recommender.py
+├── src/copilot.py
+├── src/evaluation.py
+├── tests/test_recommender.py
+├── assets/system_architecture.md
+├── artifacts/reliability_report.json
+└── model_card.md
+```
+
 ## Reflection
 
 - Main learning: user flow and reliability signals are as important as ranking math.
@@ -126,3 +157,13 @@ Request logs: `artifacts/recommendation_log.jsonl`
   - visible AI feature behavior (retrieval + story),
   - confidence/guardrail behavior,
   - clear final recommendations.
+
+## Submission Checklist
+
+- Public repo with multiple meaningful commits.
+- Functional code for Streamlit UI + Copilot pipeline.
+- README with setup, architecture, sample interactions, testing, and reflection.
+- `model_card.md` with ethics, bias, reliability, and AI-collaboration reflection.
+- Architecture diagram in `assets/`.
+- Reliability artifacts in `artifacts/`.
+- Loom walkthrough link added before submission.
